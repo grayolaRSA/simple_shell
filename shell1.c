@@ -7,68 +7,72 @@
 
 /**
  *main -takes arguments and runs functions
- *@argc: number of arguments
- *@argv: string content of arguments
- *Return: always zero
+ *Return: void
  */
 
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	char *command = NULL;
 	size_t len = 0;
 	char *stkn;
 	pid_t my_pid;
 	int status, i = 1;
-	char **args;
-
+	char **argv;
+	ssize_t read;
 
 	while (i)
 	{
 		printf("$ ");
-		getline(&command, &len, stdin);
-
-		stkn = strtok(command, " \n");
-		args = malloc(sizeof(char *) * argc);
-		args[0] = stkn;
-
-		i = 1;
-		while (stkn != NULL)
+		read = getline(&command, &len, stdin);
+		argv = (char **)malloc(sizeof(char *) * (read + 1));
+		if (argv == NULL)
 		{
-			stkn = strtok(NULL, " \n");
-			argv[i] = stkn;
-			i++;
+			perror("malloc");
+			exit(1);
 		}
 
-		if (strcmp(args[0], "exit") == 0 && (args[1] == NULL))
+		stkn = strtok(command, " \n");
+		i = 0;
+		while (stkn != NULL)
+		{
+			argv[i] = stkn;
+			i++;
+			stkn = strtok(NULL, "\n");
+		}
+		argv[i] = NULL;
+
+		if (strcmp(argv[0], "exit") == 0 && (argv[1] == NULL))
+		{
 			free(command);
-		free(args);
-		exit(0);
+			free(argv);
+			exit(0);
+		}
+
 	}
 
 	my_pid = fork();
 	{
+		if (my_pid == 0)
+		{
+			printf("the command you entered is %s", argv[0]);
+			if (execvp(argv[0], argv) == -1)
+			{
+				perror(argv[0]);
+				return (1);
+			}
+		}
+		else
+		{
+			wait(&status);
+			free(argv);
+		}
+
 		if (my_pid == -1)
 		{
 			perror("Error");
 			return (1);
 		}
-		else
-			if (my_pid == 0)
-			{
-				args = malloc(sizeof(char *) * argc);
-				if (execve(args[0], args, NULL) == -1)
-				{
-					perror(args[0]);
-					return (1);
-				}
-
-			}
-			else
-			{
-				wait(&status);
-			}
-		free(args);
 	}
 	return (0);
 }
