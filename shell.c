@@ -10,6 +10,7 @@
  *Return: void
  */
 
+extern char **environ;
 
 int main(void)
 {
@@ -17,63 +18,69 @@ int main(void)
 	size_t len = 0;
 	char *stkn;
 	pid_t my_pid;
-	int status, i = 1;
-	char **argv;
+	int status, i;
 	ssize_t read;
+	char **arr;
 
 	while (1)
 	{
 		printf("$ ");
 		read = getline(&command, &len, stdin);
-		argv = (char **)malloc(sizeof(char *) * (read + 1));
-		if (argv == NULL)
-		{
-			perror("malloc");
-			exit(1);
-		}
 
 		stkn = strtok(command, " \n");
-		argv[0] = stkn;
+
+		arr = malloc(sizeof(char *) * (read + 1));
+
+		arr[0] = stkn;
 
 		i = 1;
 		while (stkn != NULL)
 		{
 			stkn = strtok(NULL, " \n");
-			argv[i] = stkn;
+			arr[i] = stkn;
 			i++;
 		}
-		argv[i] = NULL;
+		arr[i] = NULL;
 
-		if (strcmp(argv[0], "exit") == 0 && (argv[1] == NULL))
+		if (strcmp(arr[0], "exit") == 0 && (arr[1] == NULL))
 		{
 			free(command);
-			free(argv);
+			free(arr);
 			exit(0);
 		}
 
-		my_pid = fork();
+		if (strcmp(arr[0], "env") == 0 && (arr[1] == NULL))
 		{
-			if (my_pid == -1)
+			i = 0;
+			while (environ[i] != NULL)
 			{
-				perror("Error");
-				return (1);
+				printf("%s\n", environ[i]);
+				i++;
 			}
+			continue;
+		}
+		my_pid = fork();
+		if (my_pid == -1)
+		{
+			perror("Error");
+			return (1);
+		}
 
-			else if (my_pid == 0)
+		else
+			if (my_pid == 0)
 			{
-				printf("the command you entered is %s\n", argv[0]);
-				if (execve(argv[0], argv, NULL) == -1)
+				if (execve(arr[0], arr, NULL) == -1)
 				{
-					perror(argv[0]);
+					perror(arr[0]);
 					return (1);
 				}
+
 			}
 			else
 			{
 				wait(&status);
 			}
-			free(argv);
-		}
+		free(arr);
 	}
 	return (0);
 }
