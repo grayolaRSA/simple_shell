@@ -21,7 +21,7 @@ int main(void)
 	char **argv;
 	ssize_t read;
 
-	while (i)
+	while (1)
 	{
 		printf("$ ");
 		read = getline(&command, &len, stdin);
@@ -33,12 +33,14 @@ int main(void)
 		}
 
 		stkn = strtok(command, " \n");
-		i = 0;
+		argv[0] = stkn;
+
+		i = 1;
 		while (stkn != NULL)
 		{
+			stkn = strtok(NULL, " \n");
 			argv[i] = stkn;
 			i++;
-			stkn = strtok(NULL, "\n");
 		}
 		argv[i] = NULL;
 
@@ -49,29 +51,28 @@ int main(void)
 			exit(0);
 		}
 
-	}
-
-	my_pid = fork();
-	{
-		if (my_pid == 0)
+		my_pid = fork();
 		{
-			printf("the command you entered is %s", argv[0]);
-			if (execvp(argv[0], argv) == -1)
+			if (my_pid == -1)
 			{
-				perror(argv[0]);
+				perror("Error");
 				return (1);
 			}
-		}
-		else
-		{
-			wait(&status);
-			free(argv);
-		}
 
-		if (my_pid == -1)
-		{
-			perror("Error");
-			return (1);
+			else if (my_pid == 0)
+			{
+				printf("the command you entered is %s\n", argv[0]);
+				if (execve(argv[0], argv, NULL) == -1)
+				{
+					perror(argv[0]);
+					return (1);
+				}
+			}
+			else
+			{
+				wait(&status);
+			}
+			free(argv);
 		}
 	}
 	return (0);
