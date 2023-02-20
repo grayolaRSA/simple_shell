@@ -69,7 +69,7 @@ int main(void)
 		else
 			if (my_pid == 0)
 			{
-				if (execve(arr[0], arr, NULL) == -1)
+				if (execvp(arr[0], arr) == -1)
 				{
 					perror(arr[0]);
 					return (1);
