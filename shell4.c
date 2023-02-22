@@ -22,7 +22,7 @@ char **tokenizes(int *argc, char *words, char *delim)
 	char **argv;
 	int i = 0;
 
-	cmd_cop = strdup(words); //memory allocated 1
+	cmd_cop = strdup(words);
 
 	*argc = 1;
 
@@ -43,12 +43,12 @@ char **tokenizes(int *argc, char *words, char *delim)
 
 	for (i = 0; token; i++)
 	{
-		argv[i] = malloc(sizeof(char) * (strlen(token) + 1));//memory allocated 2
+		argv[i] = malloc(sizeof(char) * (strlen(token) + 1));
 		strcpy(argv[i], token);
 		token = strtok(NULL, delim);
 	}
 	argv[i] = NULL;
-	free(cmd_cop); //memory freed 1
+	free(cmd_cop);
 	return (argv);
 }
 
@@ -178,9 +178,7 @@ int main(void)
 
 		while (path != NULL)
 		{
-			printf("%s - path\n", path);
 			shellexec(argv);
-			free(argv[0]);
 		}
 		free(argv);
 		free(words);
