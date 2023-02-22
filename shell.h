@@ -231,6 +231,8 @@ void check_chain(info_t *, char *, size_t *, size_t, size_t);
 int replace_alias(info_t *);
 int replace_vars(info_t *);
 int replace_string(char **, char *);
+
+/* shell4.c */
 char **tokenizes(int *argc, char *words, char *delim);
 int isValidPath(char *path);
 char *getPath(char *cmd);
